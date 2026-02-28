@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Live Crypto Footer</title>
+    <style>
+         :root {
+            --bg: #121212;
+            --text: #ffffff;
+            --footer-bg: #1a1a1a;
+        }
+        
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            padding-bottom: 60px;
+            transition: all 0.3s ease;
+        }
+        
+        #crypto-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: var(--footer-bg);
+            color: var(--text);
+            font-size: 13px;
+            padding: 10px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            overflow-x: auto;
+            white-space: nowrap;
+            border-top: 1px solid #333;
+            z-index: 999;
+        }
+        
+        .coin {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .coin img {
+            width: 18px;
+            height: 18px;
+        }
+        
+        .up {
+            color: #00e676;
+        }
+        
+        .down {
+            color: #ff5252;
+        }
+        
+        .live-dot {
+            color: #00e676;
+            font-size: 10px;
+        }
+        
+        #theme-switcher {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: var(--footer-bg);
+            border: 1px solid #555;
+            color: var(--text);
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 8px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+
+<body>
+
+    <button id="theme-switcher">🌙 الوضع: مظلم</button>
+
+    <div id="crypto-footer">
+        <span class="live-dot">● Live</span>
+    </div>
+
+    <script>
+        const coinIds = [
+            'bitcoin', 'ethereum', 'tether', 'xrp', 'binancecoin', 'solana', 'usd-coin', 'tron', 'cardano',
+            'dogwifcoin', 'trumpcoin', 'litecoin', 'toncoin', 'polkadot', 'chainlink', 'uniswap', 'stellar',
+            'aptos', 'optimism', 'arbitrum', 'kaspa', 'dogecoin', 'shiba-inu', 'pepe', 'floki', 'dogwifhat',
+            'trump', 'bonk', 'fartcoin', 'pudgy-penguins', 'brett', 'titcoin', 'labubu', 'buckazoids', 'ghibli',
+            'gork', 'vine', 'mask-network', 'jeo-bodot', 'mog-coin', 'chudjak', 'grok', 'based-pepe',
+            'milady-meme-coin', 'milady-wif-hat', 'milady-vault', 'milady-shiba', 'based-doge', 'elon-doge',
+            'elon-musk-ceo', 'elon-pepe', 'musk-doge'
+        ];
+
+
+        const footer = document.getElementById("crypto-footer");
+
+        async function updatePrices() {
+            try {
+                const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${coinIds.join(',')}`);
+                const data = await res.json();
+
+                footer.innerHTML = `<span class="live-dot">● Live</span>`;
+
+                data.forEach(coin => {
+                    const price = coin.current_price.toFixed(2);
+                    const change = ((coin.price_change_percentage_24h !== null && coin.price_change_percentage_24h !== undefined) ?
+                        coin.price_change_percentage_24h :
+                        0).toFixed(2);
+                    const changeClass = change >= 0 ? 'up' : 'down';
+                    const sign = change >= 0 ? '+' : '';
+
+                    const div = document.createElement("div");
+                    div.className = "coin";
+                    div.innerHTML = `
+            <img src="${coin.image}" alt="${coin.symbol}" />
+            <strong>${coin.symbol.toUpperCase()}</strong>
+            $${price}
+            <span class="${changeClass}">(${sign}${change}%)</span>
+          `;
+                    footer.appendChild(div);
+                });
+
+            } catch (e) {
+                footer.innerHTML += `<span style="color:red;">Error loading data</span>`;
+                console.error(e);
+            }
+        }
+
+        updatePrices();
+        setInterval(updatePrices, 1000000);
+
+        // 🔁 تبديل الثيم
+        const switcher = document.getElementById("theme-switcher");
+        const themes = [{
+            name: "مظلم",
+            bg: "#121212",
+            text: "#ffffff",
+            footer: "#1a1a1a",
+            icon: "🌙"
+        }, {
+            name: "أبيض",
+            bg: "#ffffff",
+            text: "#000000",
+            footer: "#f0f0f0",
+            icon: "☀️"
+        }, {
+            name: "دَسك",
+            bg: "#f7e1c2",
+            text: "#2c1f14",
+            footer: "#e1c6a8",
+            icon: "🌅"
+        }, ];
+        let current = 0;
+
+        switcher.onclick = () => {
+            current = (current + 1) % themes.length;
+            const theme = themes[current];
+            document.documentElement.style.setProperty('--bg', theme.bg);
+            document.documentElement.style.setProperty('--text', theme.text);
+            document.documentElement.style.setProperty('--footer-bg', theme.footer);
+            switcher.innerHTML = `${theme.icon} الوضع: ${theme.name}`;
+        };
+    </script>
+
+</body>
+
+</html>
